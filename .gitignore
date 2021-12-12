@@ -130,4 +130,5 @@ dmypy.json
 
 # tvshow-manager
 .idea
+tmdb_api/
 *.db
