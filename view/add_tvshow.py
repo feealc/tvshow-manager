@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from api.TMDBRest import TMDBRest
 from model.tvshow_search import TVShowSearch
 from database.tvshow_db import TVShowDb
+from custom.BTableWidget import BTableWidget
 import json
 import traceback
 
@@ -46,12 +47,11 @@ class AddTvShowWindow(QMainWindow):
         self.layout_row.addWidget(self.textbox_name)
         self.layout_row.addWidget(self.button_search)
 
-        self.table_result = QTableWidget()
-        self.table_result.setSelectionBehavior(QAbstractItemView.SelectRows)
-
+        # table
+        self.table_result = BTableWidget()
+        self.table_result.b_set_select_row()
         header_labels = ['Nome', 'Data 1º episódio']
-        self.table_result.setColumnCount(len(header_labels))
-        self.table_result.setHorizontalHeaderLabels(header_labels)
+        self.table_result.b_set_column_header(header_labels=header_labels)
         self.table_result.horizontalHeader().setStretchLastSection(True)
 
         self.rb_eu = QRadioButton("Eu")
@@ -71,10 +71,8 @@ class AddTvShowWindow(QMainWindow):
 
         self.main_layout.addLayout(self.layout_row)
         self.main_layout.addWidget(self.table_result)
-        # self.main_layout.addLayout(self.layout_rb)
         self.main_layout.addWidget(self.groupbox_rb)
         self.main_layout.addWidget(self.bt_save)
-        # self.setLayout(self.layout_main)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
@@ -112,26 +110,13 @@ class AddTvShowWindow(QMainWindow):
             print(traceback.format_exc())
             return
 
-        self.table_result.clearContents()
-        self.table_result.setRowCount(0)
+        self.table_result.b_clear_content()
 
         self.tvshow_search_list.sort(key=lambda x: x.name)
         for tvs in self.tvshow_search_list:
             # print(tvs)
-            self.__add_table_row(tvs)
+            self.table_result.b_add_row(from_tuple=tvs.to_tuple())
         self.__ajust_table_columns()
-
-    def __add_table_row(self, tvshow):
-        row = self.table_result.rowCount()
-        self.table_result.setRowCount(row + 1)
-        col = 0
-        for item in tvshow.to_tuple():
-            cell = QTableWidgetItem(str(item))
-            # cell.setFlags(QtCore.Qt.ItemIsEditable)
-            # cell.setFlags(QtCore.Qt.ItemIsEnabled)
-            # cell.setFlags(QtCore.Qt.ItemIsEditable)
-            self.table_result.setItem(row, col, cell)
-            col += 1
 
     def __ajust_table_columns(self):
         header = self.table_result.horizontalHeader()

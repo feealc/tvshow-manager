@@ -4,6 +4,7 @@ from database.tvshow_db import TVShowDb
 from model.tvshow import TVShow
 from view.add_tvshow import AddTvShowWindow
 from view.tvshow_info import TvShowInfoWindow
+from custom.BTableWidget import BTableWidget
 
 
 class MainWindown(QMainWindow):
@@ -37,11 +38,11 @@ class MainWindown(QMainWindow):
         self.bt_add_tvshow.clicked.connect(self.__add_tvshow)
 
         # table
-        self.main_table = QTableWidget()
-        self.main_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.main_table = BTableWidget()
+        self.main_table.b_hide_vertical_headers()
+        self.main_table.b_set_select_row()
         header_labels = ['Id', 'Id TMDb', 'Nome', 'Temporadas', 'Eu', 'Pai']
-        self.main_table.setColumnCount(len(header_labels))
-        self.main_table.setHorizontalHeaderLabels(header_labels)
+        self.main_table.b_set_column_header(header_labels=header_labels)
 
         # episodes button
         self.bt_episodes = QPushButton('Episódios')
@@ -77,15 +78,14 @@ class MainWindown(QMainWindow):
         self.__load_tbshows()
 
     def __load_tbshows(self):
-        self.main_table.clearContents()
-        self.main_table.setRowCount(0)
+        self.main_table.b_clear_content()
 
         lines = self.__db.select_all_tvshows()
         self.tvshows_list = []
         for line in lines:
             tvs = TVShow(line)
             self.tvshows_list.append(tvs)
-            self.__add_table_row(tvs)
+            self.main_table.b_add_row(from_tuple=tvs.to_tuple())
         self.__ajust_table_columns()
 
     def __ajust_table_columns(self):
@@ -108,15 +108,6 @@ class MainWindown(QMainWindow):
         # pai
         index += 1
         header.setSectionResizeMode(index, QHeaderView.ResizeToContents)
-
-    def __add_table_row(self, tvshow):
-        row = self.main_table.rowCount()
-        self.main_table.setRowCount(row + 1)
-        col = 0
-        for item in tvshow.to_tuple():
-            cell = QTableWidgetItem(str(item))
-            self.main_table.setItem(row, col, cell)
-            col += 1
 
     def __create_test_buttons(self):
         gb_test = QGroupBox('Test')
