@@ -25,7 +25,8 @@ def teste_gui():
     # print('teste_gui()')
     app = QApplication([])
     win = MainWindown()
-    win.show()
+    # win.show()
+    win.showMaximized()
     sys.exit(app.exec())
 
 
