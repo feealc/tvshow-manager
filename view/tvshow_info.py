@@ -114,7 +114,7 @@ class TvShowInfoWindow(QMainWindow):
         if q == QMessageBox.Yes:
             # print('yes')
             # print(self.tvshow)
-            self.__db.delete_all_tvshow_episodes(self.tvshow.id_tmdb)
+            self.__db.delete_all_episodes_from_tvshow(self.tvshow.id_tmdb)
             # self.tvshow.total_seasons = 2  # forçando pra testar
             for temp in range(1, self.tvshow.total_seasons + 1):
                 # print(f'temp [{temp}]')

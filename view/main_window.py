@@ -33,10 +33,6 @@ class MainWindown(QMainWindow):
         self.setWindowTitle('Séries')
         self.resize(700, 500)
 
-        # add button
-        self.bt_add_tvshow = QPushButton("Adicionar")
-        self.bt_add_tvshow.clicked.connect(self.__add_tvshow)
-
         # table
         self.main_table = BTableWidget()
         self.main_table.b_hide_vertical_headers()
@@ -44,14 +40,24 @@ class MainWindown(QMainWindow):
         header_labels = ['Id', 'Id TMDb', 'Nome', 'Temporadas', 'Eu', 'Pai']
         self.main_table.b_set_column_header(header_labels=header_labels)
 
-        # episodes button
+        # buttons
+        self.bt_add_tvshow = QPushButton("Adicionar")
+        self.bt_add_tvshow.clicked.connect(self.__add_tvshow)
+        # self.bt_add_tvshow.setShortcut('Ctrl+D')
+        self.bt_delete_tvshow = QPushButton("Apagar")
+        self.bt_delete_tvshow.clicked.connect(self.__delete_tvshow)
         self.bt_episodes = QPushButton('Episódios')
         self.bt_episodes.clicked.connect(self.__show_episodes)
+        self.row_layout1 = QHBoxLayout()
+        self.row_layout1.addWidget(self.bt_add_tvshow)
+        self.row_layout1.addWidget(self.bt_delete_tvshow)
+        self.row_layout2 = QHBoxLayout()
+        self.row_layout2.addWidget(self.bt_episodes)
 
         # all
-        self.main_layout.addWidget(self.bt_add_tvshow)
         self.main_layout.addWidget(self.main_table)
-        self.main_layout.addWidget(self.bt_episodes)
+        self.main_layout.addLayout(self.row_layout1)
+        self.main_layout.addLayout(self.row_layout2)
         self.__create_test_buttons()
 
     def keyPressEvent(self, event):
@@ -62,6 +68,22 @@ class MainWindown(QMainWindow):
         self.add_win = AddTvShowWindow()
         self.add_win.window_closed.connect(self.add_win_close_event)
         self.add_win.show()
+
+    def __delete_tvshow(self):
+        index = self.main_table.currentRow()
+        # print(f'index [{index}]')
+        if index >= 0:
+            tvs = self.tvshows_list[index]
+            # print(f'name [{tvs.name}] id tmdb [{tvs.id_tmdb}]')
+            q = QMessageBox.question(self, 'Apagar série', f'Tem certeza que deseja apagar a série {tvs.name}?',
+                                     QMessageBox.Yes | QMessageBox.No)
+            if q == QMessageBox.Yes:
+                self.__db.delete_tvshow_and_episodes(id_tmdb=tvs.id_tmdb)
+                QMessageBox.information(self, 'Apagar série', f'Série {tvs.name} apagada com sucesso.', QMessageBox.Ok)
+                self.__load_tbshows()
+        else:
+            QMessageBox.information(self, 'Apagar série', 'Escolha uma série para apagar.', QMessageBox.Ok)
+            self.main_table.setFocus()
 
     def __show_episodes(self):
         index = self.main_table.currentRow()

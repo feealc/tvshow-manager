@@ -196,7 +196,7 @@ class TVShowDb:
         self.__close_conn()
         return lines
 
-    def delete_all_tvshow(self):
+    def delete_all_tvshows(self):
         self.__connect()
         self.__cursor.execute(f"""
         DELETE FROM {self.main_table_name};
@@ -212,10 +212,21 @@ class TVShowDb:
         self.__commit()
         self.__close_conn()
 
-    def delete_all_tvshow_episodes(self, id_tmdb):
+    def delete_all_episodes_from_tvshow(self, id_tmdb):
         self.__connect()
         self.__cursor.execute(f"""
         DELETE FROM {self.episode_table_name} WHERE id_tmdb = {id_tmdb};
+        """)
+        self.__commit()
+        self.__close_conn()
+
+    def delete_tvshow_and_episodes(self, id_tmdb):
+        self.__connect()
+        self.__cursor.execute(f"""
+        DELETE FROM {self.episode_table_name} WHERE id_tmdb = {id_tmdb};
+        """)
+        self.__cursor.execute(f"""
+        DELETE FROM {self.main_table_name} WHERE id_tmdb = {id_tmdb};
         """)
         self.__commit()
         self.__close_conn()
