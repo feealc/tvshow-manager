@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from api.TMDBRest import TMDBRest
 from model.tvshow_episodes import TVShowEpisodes
 from database.tvshow_db import TVShowDb
+from custom.BTableWidget import BTableWidget
 import json
 import traceback
 
@@ -62,14 +63,13 @@ class TvShowInfoWindow(QMainWindow):
         self.gb_filter = QGroupBox('Filtro')
         self.gb_filter.setLayout(self.layout_filter)
 
-        self.main_table = QTableWidget()
-        self.main_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-
+        # table
+        self.main_table = BTableWidget()
+        self.main_table.b_set_select_row()
+        self.main_table.b_hide_vertical_headers()
         header_labels = ['Temp', 'Ep', 'Exibido', 'Visto']
-        self.main_table.setColumnCount(len(header_labels))
-        self.main_table.setHorizontalHeaderLabels(header_labels)
+        self.main_table.b_set_column_header(header_labels=header_labels)
         self.main_table.horizontalHeader().setStretchLastSection(True)
-        self.main_table.verticalHeader().setVisible(False)
 
         # self.bt_save = QPushButton('Salvar')
         # self.bt_save.clicked.connect(self.save_add_tvshow)
@@ -87,8 +87,7 @@ class TvShowInfoWindow(QMainWindow):
 
     def __load_episodes(self):
         self.cb_seasons_filter.clear()
-        self.main_table.clearContents()
-        self.main_table.setRowCount(0)
+        self.main_table.b_clear_content()
 
         lines = self.__db.select_all_episodes_by_tvshow(tvshow=self.tvshow, debug=False)
         self.episodes_list = []
@@ -96,22 +95,13 @@ class TvShowInfoWindow(QMainWindow):
         for line in lines:
             tvs = TVShowEpisodes(from_db=line)
             self.episodes_list.append(tvs)
-            self.add_table_row(tvs)
+            self.main_table.b_add_row(from_tuple=tvs.to_tuple_table())
             if str(tvs.season) in seasons_list:
                 pass
             else:
                 seasons_list.append(str(tvs.season))
         self.cb_seasons_filter.addItems(seasons_list)
         self.cb_seasons_filter.setCurrentIndex(-1)
-
-    def add_table_row(self, episode):
-        row = self.main_table.rowCount()
-        self.main_table.setRowCount(row + 1)
-        col = 0
-        for item in episode.to_tuple_table():
-            cell = QTableWidgetItem(str(item))
-            self.main_table.setItem(row, col, cell)
-            col += 1
 
     def init_from_tmdb(self):
         # print('init_from_tmdb()')
