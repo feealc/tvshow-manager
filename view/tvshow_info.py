@@ -71,6 +71,14 @@ class TvShowInfoWindow(QMainWindow):
         self.main_table.b_set_column_header(header_labels=header_labels)
         self.main_table.horizontalHeader().setStretchLastSection(True)
 
+        # mark as seen
+        self.gb_seen = QGroupBox('Visto')
+        self.gb_seen_layout = QVBoxLayout()
+        self.bt_mark_as_seen = QPushButton('Marcar como visto')
+        self.bt_mark_as_seen.clicked.connect(self.mark_as_seen)
+        self.gb_seen_layout.addWidget(self.bt_mark_as_seen)
+        self.gb_seen.setLayout(self.gb_seen_layout)
+
         # self.bt_save = QPushButton('Salvar')
         # self.bt_save.clicked.connect(self.save_add_tvshow)
 
@@ -80,6 +88,7 @@ class TvShowInfoWindow(QMainWindow):
         self.main_layout.addWidget(self.gb_bts)
         self.main_layout.addWidget(self.gb_filter)
         self.main_layout.addWidget(self.main_table)
+        self.main_layout.addWidget(self.gb_seen)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
@@ -144,3 +153,16 @@ class TvShowInfoWindow(QMainWindow):
         val = self.cb_seasons_filter.currentText()
         print(f'cb_filter_changed() - index [{index}] val [{val}]')
         self.__load_episodes()
+
+    def mark_as_seen(self):
+        # print('mark_as_seen()')
+        index = self.main_table.currentRow()
+        # print(f'index [{index}]')
+        if index >= 0:
+            ep = self.episodes_list[index]
+            # print(ep)
+            self.__db.mark_episode_seen(id_tmdb=ep.id_tmdb, season=ep.season, episode=ep.episode)
+            self.__load_episodes()
+        else:
+            QMessageBox.information(self, ' ', 'Escolha um episódio.', QMessageBox.Ok)
+            self.main_table.setFocus()

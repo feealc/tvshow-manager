@@ -7,8 +7,8 @@ class TVShowEpisodes:
             self.__parse_from_json(from_json)
 
     def __str__(self) -> str:
-        return f'Id TMDB [{self.id_tmdb}] temp [{self.season}] ep [{self.episode}] ' \
-               f'air date [{self.air_date}] watched [{self.watched}]'
+        return f'id_tmdb [{self.id_tmdb}] season [{self.season}] episode [{self.episode}] ' \
+               f'air_date [{self.air_date}] watched [{self.watched}]'
 
     def __parse_from_tuple(self, tuple_from_db):
         index = 0
@@ -25,7 +25,7 @@ class TVShowEpisodes:
         self.__treat_air_date()
 
         index += 1
-        self.watched = tuple_from_db[index]
+        self.watched = bool(tuple_from_db[index])
         self.__treat_watched()
 
     def __parse_from_json(self, json_from_api):
@@ -43,7 +43,7 @@ class TVShowEpisodes:
         self.id_tmdb = id_tmdb
 
     def to_tuple_table(self):
-        array = [self.season, self.episode, self.air_date, self.watched]
+        array = [self.season, self.episode, self.air_date, self.watched_table]
         return tuple(array)
 
     def to_tuple(self):
@@ -56,6 +56,6 @@ class TVShowEpisodes:
 
     def __treat_watched(self):
         if self.watched:
-            self.watched = '✅'
+            self.watched_table = '✅'
         else:
-            self.watched = ''
+            self.watched_table = ''
