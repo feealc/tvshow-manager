@@ -25,13 +25,13 @@ class MainWindown(QMainWindow):
     def __select_row_test(self):
         for index, tvs in enumerate(self.tvshows_list):
             # print(f'index [{index}] nome [{tvs.name}]')
-            if tvs.name == 'FBI Most Wanted':
+            if tvs.name == 'FBI: Most Wanted':
                 self.main_table.selectRow(index)
 
     def __init_interface(self):
         # window
         self.setWindowTitle('Séries')
-        self.resize(700, 500)
+        self.resize(800, 700)
 
         # table
         self.main_table = BTableWidget()
@@ -165,6 +165,7 @@ class MainWindown(QMainWindow):
         self.__db.reset_main_table()
         self.__db.insert_tvshow_mock()
         self.__load_tbshows()
+        QMessageBox.information(self, ' ', 'Reset das séries realizado com sucesso.', QMessageBox.Ok)
 
     def __create_test_buttons_clear_episodes(self):
         self.__db.delete_all_episodes()

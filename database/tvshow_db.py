@@ -1,5 +1,6 @@
 # from model.tvshow_search import TVShowSearch
 import sqlite3
+# import random
 
 
 class TVShowDb:
@@ -82,7 +83,7 @@ class TVShowDb:
         self.__close_conn()
 
     def reset_main_table(self):
-        self.delete_all()
+        self.delete_all_tvshows()
         self.__connect()
         self.__cursor.execute(f"""
         UPDATE sqlite_sequence SET seq = 0 WHERE name = '{self.main_table_name}';
@@ -112,9 +113,9 @@ class TVShowDb:
             (71728, 'Young Sheldon', 5, True, False),
             # pai
             (80748, 'FBI', 4, False, True),
-            (94372, 'FBI Most Wanted', 3, False, True),
+            (94372, 'FBI: Most Wanted', 3, False, True),
             (4614, 'NCIS', 19, False, True),
-            (17610, 'NCIS Los Angeles', 13, False, True),
+            (17610, 'NCIS: Los Angeles', 13, False, True),
         ]
         self.__connect()
         self.__cursor.executemany(f"""
@@ -136,6 +137,9 @@ class TVShowDb:
     def insert_episode_mock(self, id_tmdb, season, episode_max, air_date=None, watched=False):
         rows = []
         for ep in range(1, episode_max + 1):
+            # if not watched:
+            #     watched = random.randint(0, 1)
+            #     print(f'watched random [{watched}]')
             tup = (id_tmdb, season, ep, air_date, watched)
             rows.append(tup)
 
@@ -227,6 +231,18 @@ class TVShowDb:
         """)
         self.__cursor.execute(f"""
         DELETE FROM {self.main_table_name} WHERE id_tmdb = {id_tmdb};
+        """)
+        self.__commit()
+        self.__close_conn()
+
+    def mark_episode_seen(self, id_tmdb, season, episode):
+        self.__connect()
+        self.__cursor.execute(f"""
+        UPDATE {self.episode_table_name}
+        SET
+        watched = 1
+        WHERE
+        id_tmdb = {id_tmdb} AND season = {season} AND episode = {episode};
         """)
         self.__commit()
         self.__close_conn()
