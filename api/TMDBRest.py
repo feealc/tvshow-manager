@@ -9,6 +9,7 @@ class TMDBRest:
         #
         self.__headers = {}
         self.__response = None
+        self.__timeout = 0.2
 
     def __clean(self):
         self.__url = ''
@@ -56,7 +57,7 @@ class TMDBRest:
         self.url_add_param(include_adult='false', query=query)
         # self.dump_url()
 
-        self.__response = requests.get(self.__url)
+        self.__response = requests.get(self.__url, timeout=self.__timeout)
         return self.__handle_response()
 
     def get_tvshow_info(self, id_tmdb):
@@ -68,7 +69,7 @@ class TMDBRest:
         self.url_add_param()
         # self.dump_url()
 
-        self.__response = requests.get(self.__url)
+        self.__response = requests.get(self.__url, timeout=self.__timeout)
         return self.__handle_response()
 
     def get_tvshow_season_episodes(self, id_tmdb, season):
@@ -82,5 +83,5 @@ class TMDBRest:
         self.url_add_param()
         # self.dump_url()
 
-        self.__response = requests.get(self.__url)
+        self.__response = requests.get(self.__url, timeout=self.__timeout)
         return self.__handle_response()
