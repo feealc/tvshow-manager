@@ -184,7 +184,10 @@ class TvShowInfoWindow(QMainWindow):
         index = self.main_table.currentRow()
         # print(f'index [{index}]')
         if index >= 0:
-            ep = self.episodes_list[index]
+            if self.is_filtered:
+                ep = self.episodes_list_filter[index]
+            else:
+                ep = self.episodes_list[index]
             # print(ep)
             self.__db.mark_episode_seen(id_tmdb=ep.id_tmdb, season=ep.season, episode=ep.episode)
             self.__load_episodes()
