@@ -15,10 +15,10 @@ class TVShowEpisodes:
         self.id_tmdb = tuple_from_db[index]
 
         index += 1
-        self.season = tuple_from_db[index]
+        self.season = int(tuple_from_db[index])
 
         index += 1
-        self.episode = tuple_from_db[index]
+        self.episode = int(tuple_from_db[index])
 
         index += 1
         self.air_date = tuple_from_db[index]

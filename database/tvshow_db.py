@@ -246,3 +246,15 @@ class TVShowDb:
         """)
         self.__commit()
         self.__close_conn()
+
+    def mark_season_seen(self, id_tmdb, season):
+        self.__connect()
+        self.__cursor.execute(f"""
+        UPDATE {self.episode_table_name}
+        SET
+        watched = 1
+        WHERE
+        id_tmdb = {id_tmdb} AND season = {season};
+        """)
+        self.__commit()
+        self.__close_conn()

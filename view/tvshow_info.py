@@ -20,6 +20,7 @@ class TvShowInfoWindow(QMainWindow):
         self.setCentralWidget(self.centralWidget)
         self.main_layout = QVBoxLayout()
         self.centralWidget.setLayout(self.main_layout)
+        self.is_filtered = False
 
         if tvshow is None:
             return
@@ -29,6 +30,7 @@ class TvShowInfoWindow(QMainWindow):
         # print(self.tvshow)
 
         self.episodes_list = []
+        self.episodes_list_filter = []
         self.__init_interface()
         self.__load_episodes()
 
@@ -53,15 +55,22 @@ class TvShowInfoWindow(QMainWindow):
         self.gb_bts = QGroupBox()
         self.gb_bts.setLayout(self.layout_bts)
 
-        self.cb_seasons_filter = QComboBox()
-        # self.cb_seasons_filter.currentIndexChanged.connect(self.cb_filter_changed)
-        self.label_filter_cb = QLabel("Temporadas:")
-        self.label_filter_cb.setBuddy(self.cb_seasons_filter)
-        self.layout_filter = QHBoxLayout()
-        self.layout_filter.addWidget(self.label_filter_cb)
-        self.layout_filter.addWidget(self.cb_seasons_filter)
+        # filter
         self.gb_filter = QGroupBox('Filtro')
-        self.gb_filter.setLayout(self.layout_filter)
+        self.layout_filter_main = QVBoxLayout()
+        self.bt_clear_filter = QPushButton('Limpar')
+        self.bt_clear_filter.clicked.connect(self.clear_filter)
+        self.layout_filter_main.addWidget(self.bt_clear_filter)
+        self.label_filter_cb = QLabel("Temporadas:")
+        self.cb_seasons_filter = QComboBox()
+        self.cb_seasons_filter.activated.connect(self.cb_filter_changed)
+        # self.cb_seasons_filter.currentIndexChanged.connect(self.cb_filter_changed)
+        self.label_filter_cb.setBuddy(self.cb_seasons_filter)
+        self.layout_filter_row_cb = QHBoxLayout()
+        self.layout_filter_row_cb.addWidget(self.label_filter_cb)
+        self.layout_filter_row_cb.addWidget(self.cb_seasons_filter)
+        self.layout_filter_main.addLayout(self.layout_filter_row_cb)
+        self.gb_filter.setLayout(self.layout_filter_main)
 
         # table
         self.main_table = BTableWidget()
@@ -73,10 +82,13 @@ class TvShowInfoWindow(QMainWindow):
 
         # mark as seen
         self.gb_seen = QGroupBox('Visto')
-        self.gb_seen_layout = QVBoxLayout()
-        self.bt_mark_as_seen = QPushButton('Marcar como visto')
-        self.bt_mark_as_seen.clicked.connect(self.mark_as_seen)
-        self.gb_seen_layout.addWidget(self.bt_mark_as_seen)
+        self.gb_seen_layout = QHBoxLayout()
+        self.bt_mark_episode_as_seen = QPushButton('Marcar como visto')
+        self.bt_mark_episode_as_seen.clicked.connect(self.mark_episode_as_seen)
+        self.bt_mark_season_as_seen = QPushButton('Marcar temporada como vista')
+        self.bt_mark_season_as_seen.clicked.connect(self.mark_season_as_seen)
+        self.gb_seen_layout.addWidget(self.bt_mark_episode_as_seen)
+        self.gb_seen_layout.addWidget(self.bt_mark_season_as_seen)
         self.gb_seen.setLayout(self.gb_seen_layout)
 
         # self.bt_save = QPushButton('Salvar')
@@ -95,8 +107,12 @@ class TvShowInfoWindow(QMainWindow):
             self.close()
 
     def __load_episodes(self):
-        self.cb_seasons_filter.clear()
         self.main_table.b_clear_content()
+
+        index = self.cb_seasons_filter.currentIndex()
+        val = self.cb_seasons_filter.currentText()
+        self.is_filtered = True if index >= 0 else False
+        print(f'__load_episodes() - cbox temp - index [{index}] val [{val}] is_filtered [{self.is_filtered}]')
 
         lines = self.__db.select_all_episodes_by_tvshow(tvshow=self.tvshow, debug=False)
         self.episodes_list = []
@@ -104,13 +120,21 @@ class TvShowInfoWindow(QMainWindow):
         for line in lines:
             tvs = TVShowEpisodes(from_db=line)
             self.episodes_list.append(tvs)
+            if tvs.season not in seasons_list:
+                seasons_list.append(tvs.season)
+        if not self.is_filtered:
+            self.cb_seasons_filter.clear()
+            self.cb_seasons_filter.addItems(map(str, seasons_list))
+            self.cb_seasons_filter.setCurrentIndex(-1)
+
+        self.episodes_list_filter = []
+        if self.is_filtered:
+            self.episodes_list_filter = [tvs for tvs in self.episodes_list if int(tvs.season) == int(val)]
+        else:
+            self.episodes_list_filter = self.episodes_list
+
+        for tvs in self.episodes_list_filter:
             self.main_table.b_add_row(from_tuple=tvs.to_tuple_table())
-            if str(tvs.season) in seasons_list:
-                pass
-            else:
-                seasons_list.append(str(tvs.season))
-        self.cb_seasons_filter.addItems(seasons_list)
-        self.cb_seasons_filter.setCurrentIndex(-1)
 
     def init_from_tmdb(self):
         # print('init_from_tmdb()')
@@ -149,12 +173,13 @@ class TvShowInfoWindow(QMainWindow):
             QMessageBox.information(self, ' ', 'Inicialização realizada com sucesso.', QMessageBox.Ok)
 
     def cb_filter_changed(self):
-        index = self.cb_seasons_filter.currentIndex()
-        val = self.cb_seasons_filter.currentText()
-        print(f'cb_filter_changed() - index [{index}] val [{val}]')
         self.__load_episodes()
 
-    def mark_as_seen(self):
+    def clear_filter(self):
+        self.cb_seasons_filter.setCurrentIndex(-1)
+        self.__load_episodes()
+
+    def mark_episode_as_seen(self):
         # print('mark_as_seen()')
         index = self.main_table.currentRow()
         # print(f'index [{index}]')
@@ -166,3 +191,15 @@ class TvShowInfoWindow(QMainWindow):
         else:
             QMessageBox.information(self, ' ', 'Escolha um episódio.', QMessageBox.Ok)
             self.main_table.setFocus()
+
+    def mark_season_as_seen(self):
+        print('mark_season_as_seen()')
+        index = self.cb_seasons_filter.currentIndex()
+        print(f'index [{index}]')
+        if index >= 0:
+            val = self.cb_seasons_filter.currentText()
+            self.__db.mark_season_seen(id_tmdb=self.tvshow.id_tmdb, season=val)
+            self.__load_episodes()
+        else:
+            QMessageBox.information(self, ' ', 'Selecione o filtro por uma temporada.', QMessageBox.Ok)
+            self.cb_seasons_filter.setFocus()
