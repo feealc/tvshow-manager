@@ -1,14 +1,21 @@
 import requests
 import json
 import sys
+import datetime
+import argparse
 from PyQt5.QtWidgets import *
 from api.TMDBRest import TMDBRest
 from view.main_window import MainWindown
 
 
 def teste_api():
-    pass
-    # api = TMDBRest()
+    api = TMDBRest()
+    now1 = datetime.datetime.now()
+    print(f'now1 [{now1}]')
+    resp = api.search_tvshow(query='FBI')
+    now2 = datetime.datetime.now()
+    print(resp)
+    print(f'now1 [{now1}] now2 [{now2}] diff [{now2 - now1}]')
     # api.url_add_path('tv', 4614)
     # api.url_add_param()
     # api.dump_url()
@@ -21,15 +28,22 @@ def teste_api():
     # ncis.dump()
 
 
-def teste_gui():
-    # print('teste_gui()')
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--maximized', action='store_true', help='Mostrar a tela principal maximizada')
+    parser.add_argument('-a', '--api', action='store_true', help='Chamar função teste_api()')
+    args = parser.parse_args()
+
+    if args.api:
+        teste_api()
+        sys.exit()
+
     app = QApplication([])
     win = MainWindown()
-    # win.show()
-    win.showMaximized()
+
+    if args.maximized:
+        win.showMaximized()
+    else:
+        win.show()
+
     sys.exit(app.exec())
-
-
-if __name__ == '__main__':
-    # teste_api()
-    teste_gui()
