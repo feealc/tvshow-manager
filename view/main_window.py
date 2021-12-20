@@ -3,7 +3,6 @@ from PyQt5.QtCore import *
 from database.tvshow_db import TVShowDb
 from model.tvshow import TVShow
 from view.add_tvshow import AddTvShowWindow
-from view.tvshow_info import TvShowInfoWindow
 from view.dashboard_window import DashboardWindow
 from custom.BTableWidget import BTableWidget
 
@@ -48,15 +47,12 @@ class MainWindown(QMainWindow):
         # self.bt_add_tvshow.setShortcut('Ctrl+D')
         self.bt_delete_tvshow = QPushButton("Apagar")
         self.bt_delete_tvshow.clicked.connect(self.__delete_tvshow)
-        self.bt_episodes = QPushButton('Episódios')
-        self.bt_episodes.clicked.connect(self.__show_episodes)
         self.bt_dashboard = QPushButton('Dashboard')
         self.bt_dashboard.clicked.connect(self.__show_dashboard)
         self.row_layout1 = QHBoxLayout()
         self.row_layout1.addWidget(self.bt_add_tvshow)
         self.row_layout1.addWidget(self.bt_delete_tvshow)
         self.row_layout2 = QHBoxLayout()
-        self.row_layout2.addWidget(self.bt_episodes)
         self.row_layout2.addWidget(self.bt_dashboard)
 
         # all
@@ -89,17 +85,6 @@ class MainWindown(QMainWindow):
         else:
             QMessageBox.information(self, 'Apagar série', 'Escolha uma série para apagar.', QMessageBox.Ok)
             self.main_table.setFocus()
-
-    def __show_episodes(self):
-        index = self.main_table.currentRow()
-        # print(f'index [{index}]')
-        if index >= 0:
-            tvs = self.tvshows_list[index]
-            # print(f'name [{tvs.name}]')
-            self.info_win = TvShowInfoWindow(tvshow=tvs)
-            self.info_win.show()
-        # else:
-        #     print('nada sera feito...')
 
     def __show_dashboard(self):
         index = self.main_table.currentRow()
