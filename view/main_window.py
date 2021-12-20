@@ -4,6 +4,7 @@ from database.tvshow_db import TVShowDb
 from model.tvshow import TVShow
 from view.add_tvshow import AddTvShowWindow
 from view.tvshow_info import TvShowInfoWindow
+from view.dashboard_window import DashboardWindow
 from custom.BTableWidget import BTableWidget
 
 
@@ -39,6 +40,7 @@ class MainWindown(QMainWindow):
         self.main_table.b_set_select_row()
         header_labels = ['Id', 'Id TMDb', 'Nome', 'Temporadas', 'Eu', 'Pai']
         self.main_table.b_set_column_header(header_labels=header_labels)
+        self.main_table.doubleClicked.connect(self.__show_dashboard_doubleclick)
 
         # buttons
         self.bt_add_tvshow = QPushButton("Adicionar")
@@ -48,11 +50,14 @@ class MainWindown(QMainWindow):
         self.bt_delete_tvshow.clicked.connect(self.__delete_tvshow)
         self.bt_episodes = QPushButton('Episódios')
         self.bt_episodes.clicked.connect(self.__show_episodes)
+        self.bt_dashboard = QPushButton('Dashboard')
+        self.bt_dashboard.clicked.connect(self.__show_dashboard)
         self.row_layout1 = QHBoxLayout()
         self.row_layout1.addWidget(self.bt_add_tvshow)
         self.row_layout1.addWidget(self.bt_delete_tvshow)
         self.row_layout2 = QHBoxLayout()
         self.row_layout2.addWidget(self.bt_episodes)
+        self.row_layout2.addWidget(self.bt_dashboard)
 
         # all
         self.main_layout.addWidget(self.main_table)
@@ -95,6 +100,25 @@ class MainWindown(QMainWindow):
             self.info_win.show()
         # else:
         #     print('nada sera feito...')
+
+    def __show_dashboard(self):
+        index = self.main_table.currentRow()
+        # print(f'index [{index}]')
+        if index >= 0:
+            tvs = self.tvshows_list[index]
+            # print(tvs)
+            self.dashboard_win = DashboardWindow(tvshow=tvs)
+            self.dashboard_win.show()
+        # else:
+        #     print('nada sera feito...')
+
+    def __show_dashboard_doubleclick(self, mi):
+        index = mi.row()
+        if index >= 0:
+            tvs = self.tvshows_list[index]
+            # print(tvs)
+            self.dashboard_win = DashboardWindow(tvshow=tvs)
+            self.dashboard_win.show()
 
     def add_win_close_event(self):
         self.__load_tbshows()

@@ -235,24 +235,24 @@ class TVShowDb:
         self.__commit()
         self.__close_conn()
 
-    def mark_episode_seen(self, id_tmdb, season, episode):
+    def mark_reset_episode_seen(self, id_tmdb, season, episode, value):
         self.__connect()
         self.__cursor.execute(f"""
         UPDATE {self.episode_table_name}
         SET
-        watched = 1
+        watched = {value}
         WHERE
         id_tmdb = {id_tmdb} AND season = {season} AND episode = {episode};
         """)
         self.__commit()
         self.__close_conn()
 
-    def mark_season_seen(self, id_tmdb, season):
+    def mark_reset_season_seen(self, id_tmdb, season, value):
         self.__connect()
         self.__cursor.execute(f"""
         UPDATE {self.episode_table_name}
         SET
-        watched = 1
+        watched = {value}
         WHERE
         id_tmdb = {id_tmdb} AND season = {season};
         """)
