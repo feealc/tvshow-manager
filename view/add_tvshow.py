@@ -38,7 +38,7 @@ class AddTvShowWindow(QMainWindow):
         self.label_name = QLabel()
         self.label_name.setText("Nome série: ")
         self.textbox_name = QLineEdit()
-        self.textbox_name.setText('NCIS')
+        # self.textbox_name.setText('NCIS')
         self.button_search = QPushButton('Buscar')
         self.button_search.clicked.connect(self.search_tvshow)
 
@@ -60,6 +60,7 @@ class AddTvShowWindow(QMainWindow):
         self.layout_rb = QHBoxLayout()
         self.layout_rb.setAlignment(QtCore.Qt.AlignCenter)
         self.layout_rb.addWidget(self.rb_eu)
+        self.layout_rb.addSpacing(30)
         self.layout_rb.addWidget(self.rb_pai)
         self.groupbox_rb = QGroupBox()
         self.groupbox_rb.setLayout(self.layout_rb)
