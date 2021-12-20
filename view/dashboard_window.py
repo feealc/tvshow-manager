@@ -64,7 +64,7 @@ class DashboardWindow(QMainWindow):
         self.tabbar.addTab(self.tab1, 'Informações')
         self.__create_tabbar_tab2()
         self.tabbar.addTab(self.tab2, 'Episódios')
-        self.tabbar.setCurrentIndex(1)
+        # self.tabbar.setCurrentIndex(1)
 
     def __create_tabbar_tab1(self):
         self.tab1 = QWidget()
