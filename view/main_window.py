@@ -17,6 +17,7 @@ class MainWindown(QMainWindow):
 
         self.__db = TVShowDb()
         self.tvshows_list = []
+        self.tvshows_list_filter = []
 
         self.__init_interface()
         self.__load_tbshows()
@@ -32,6 +33,23 @@ class MainWindown(QMainWindow):
         # window
         self.setWindowTitle('Séries')
         self.resize(800, 700)
+
+        # filter
+        self.gb_filter = QGroupBox('Filtro')
+        self.gb_filter_layout = QHBoxLayout()
+        self.rb_all = QRadioButton("Todas")
+        self.rb_all.toggled.connect(self.__action_rb_all)
+        self.rb_eu = QRadioButton("Eu")
+        self.rb_eu.toggled.connect(self.__action_rb_eu)
+        self.rb_pai = QRadioButton("Pai")
+        self.rb_pai.toggled.connect(self.__action_rb_pai)
+        self.gb_filter_layout.setAlignment(Qt.AlignCenter)
+        self.gb_filter_layout.addWidget(self.rb_all)
+        self.gb_filter_layout.addSpacing(30)
+        self.gb_filter_layout.addWidget(self.rb_eu)
+        self.gb_filter_layout.addSpacing(30)
+        self.gb_filter_layout.addWidget(self.rb_pai)
+        self.gb_filter.setLayout(self.gb_filter_layout)
 
         # table
         self.main_table = BTableWidget()
@@ -56,10 +74,12 @@ class MainWindown(QMainWindow):
         self.row_layout2.addWidget(self.bt_dashboard)
 
         # all
+        self.main_layout.addWidget(self.gb_filter)
         self.main_layout.addWidget(self.main_table)
         self.main_layout.addLayout(self.row_layout1)
         self.main_layout.addLayout(self.row_layout2)
         self.__create_test_buttons()
+        self.rb_all.setChecked(True)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
@@ -116,7 +136,21 @@ class MainWindown(QMainWindow):
         for line in lines:
             tvs = TVShow(line)
             self.tvshows_list.append(tvs)
+
+        self.tvshows_list_filter = []
+        for tvs in self.tvshows_list:
+            if self.rb_eu.isChecked():
+                if tvs.eu == 'Sim':
+                    self.tvshows_list_filter.append(tvs)
+            elif self.rb_pai.isChecked():
+                if tvs.pai == 'Sim':
+                    self.tvshows_list_filter.append(tvs)
+            else:
+                self.tvshows_list_filter.append(tvs)
+
+        for tvs in self.tvshows_list_filter:
             self.main_table.b_add_row(from_tuple=tvs.to_tuple())
+
         self.__ajust_table_columns()
 
     def __ajust_table_columns(self):
@@ -184,3 +218,12 @@ class MainWindown(QMainWindow):
         self.__db.delete_all_episodes()
         self.__db.insert_episodes_mock_example()
         QMessageBox.information(self, ' ', 'Reset dos episódios realizado com sucesso.', QMessageBox.Ok)
+
+    def __action_rb_all(self):
+        self.__load_tbshows()
+
+    def __action_rb_eu(self):
+        self.__load_tbshows()
+
+    def __action_rb_pai(self):
+        self.__load_tbshows()
