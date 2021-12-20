@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import *
-# from PyQt5.QtCore import *
+from PyQt5.QtCore import *
 
 
 class BTableWidget(QTableWidget):
@@ -7,6 +7,8 @@ class BTableWidget(QTableWidget):
         # super(BTableWidget, self).__init__()
         super().__init__(parent=parent)
         # print('BTableWidget init')
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.__center_content = False
 
     def b_clear_content(self):
         self.clearContents()
@@ -21,12 +23,18 @@ class BTableWidget(QTableWidget):
             # cell.setFlags(QtCore.Qt.ItemIsEditable)
             # cell.setFlags(QtCore.Qt.ItemIsEnabled)
             # cell.setFlags(QtCore.Qt.ItemIsEditable)
+            # cell.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)  # disable cell editing
+            if self.__center_content:
+                cell.setTextAlignment(Qt.AlignCenter)  # align cell content center
             self.setItem(row, col, cell)
             col += 1
 
     def b_set_column_header(self, header_labels):
         self.setColumnCount(len(header_labels))
         self.setHorizontalHeaderLabels(header_labels)
+
+    def b_set_center_content(self, value=True):
+        self.__center_content = value
 
     def b_hide_vertical_headers(self):
         self.verticalHeader().setVisible(False)
