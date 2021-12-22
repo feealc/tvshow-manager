@@ -56,8 +56,7 @@ class TVShowDb:
         self.__connect()
         self.__cursor.execute(f"""
         CREATE TABLE {self.main_table_name} (
-                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                id_tmdb INTEGER NOT NULL,
+                id INTEGER NOT NULL PRIMARY KEY,
                 name TEXT NOT NULL,
                 total_seasons INTEGER NOT NULL,
                 eu BOOLEAN,
@@ -71,22 +70,13 @@ class TVShowDb:
         self.__connect()
         self.__cursor.execute(f"""
         CREATE TABLE {self.episode_table_name} (
-                id_tmdb INTEGER NOT NULL,
+                id INTEGER NOT NULL,
                 season INTEGER NOT NULL,
                 episode INTEGER NOT NULL,
                 air_date DATE,
                 watched BOOLEAN,
-                PRIMARY KEY(id_tmdb,season,episode)
+                PRIMARY KEY(id,season,episode)
         );
-        """)
-        self.__commit()
-        self.__close_conn()
-
-    def reset_main_table(self):
-        self.delete_all_tvshows()
-        self.__connect()
-        self.__cursor.execute(f"""
-        UPDATE sqlite_sequence SET seq = 0 WHERE name = '{self.main_table_name}';
         """)
         self.__commit()
         self.__close_conn()
@@ -100,7 +90,7 @@ class TVShowDb:
         insert_list = [arg for arg in args]
         self.__connect()
         self.__cursor.execute(f"""
-        INSERT INTO {self.main_table_name} (id_tmdb, name, total_seasons, eu, pai)
+        INSERT INTO {self.main_table_name} (id, name, total_seasons, eu, pai)
         VALUES (?,?,?,?,?)
         """, tuple(insert_list))
         self.__commit()
@@ -119,7 +109,7 @@ class TVShowDb:
         ]
         self.__connect()
         self.__cursor.executemany(f"""
-        INSERT INTO {self.main_table_name} (id_tmdb, name, total_seasons, eu, pai)
+        INSERT INTO {self.main_table_name} (id, name, total_seasons, eu, pai)
         VALUES (?,?,?,?,?)
         """, rows)
         self.__commit()
@@ -128,24 +118,24 @@ class TVShowDb:
     def insert_episode(self, rows):
         self.__connect()
         self.__cursor.executemany(f"""
-        INSERT INTO {self.episode_table_name} (id_tmdb, season, episode, air_date, watched)
+        INSERT INTO {self.episode_table_name} (id, season, episode, air_date, watched)
         VALUES (?,?,?,?,?)
         """, rows)
         self.__commit()
         self.__close_conn()
 
-    def insert_episode_mock(self, id_tmdb, season, episode_max, air_date=None, watched=False):
+    def insert_episode_mock(self, id, season, episode_max, air_date=None, watched=False):
         rows = []
         for ep in range(1, episode_max + 1):
             # if not watched:
             #     watched = random.randint(0, 1)
             #     print(f'watched random [{watched}]')
-            tup = (id_tmdb, season, ep, air_date, watched)
+            tup = (id, season, ep, air_date, watched)
             rows.append(tup)
 
         self.__connect()
         self.__cursor.executemany(f"""
-        INSERT INTO {self.episode_table_name} (id_tmdb, season, episode, air_date, watched)
+        INSERT INTO {self.episode_table_name} (id, season, episode, air_date, watched)
         VALUES (?,?,?,?,?)
         """, rows)
         self.__commit()
@@ -153,16 +143,20 @@ class TVShowDb:
 
     def insert_episodes_mock_example(self):
         # fbi
-        self.insert_episode_mock(id_tmdb=80748, season=1, episode_max=22)
-        self.insert_episode_mock(id_tmdb=80748, season=2, episode_max=19)
-        self.insert_episode_mock(id_tmdb=80748, season=3, episode_max=15)
-        self.insert_episode_mock(id_tmdb=80748, season=4, episode_max=7)
+        self.insert_episode_mock(id=80748, season=1, episode_max=22)
+        self.insert_episode_mock(id=80748, season=2, episode_max=19)
+        self.insert_episode_mock(id=80748, season=3, episode_max=15)
+        self.insert_episode_mock(id=80748, season=4, episode_max=7)
 
         # the rookie
-        self.insert_episode_mock(id_tmdb=79744, season=1, episode_max=20)
-        self.insert_episode_mock(id_tmdb=79744, season=2, episode_max=20)
-        self.insert_episode_mock(id_tmdb=79744, season=3, episode_max=14)
-        self.insert_episode_mock(id_tmdb=79744, season=4, episode_max=7)
+        self.insert_episode_mock(id=79744, season=1, episode_max=20)
+        self.insert_episode_mock(id=79744, season=2, episode_max=20)
+        self.insert_episode_mock(id=79744, season=3, episode_max=14)
+        self.insert_episode_mock(id=79744, season=4, episode_max=7)
+
+    def select_all(self, debug=False):
+        self.select_all_tvshows(debug=debug)
+        self.select_all_episodes(debug=debug)
 
     def select_all_tvshows(self, debug=False):
         self.__connect()
@@ -179,7 +173,7 @@ class TVShowDb:
     def select_all_episodes(self, debug=False):
         self.__connect()
         self.__cursor.execute(f"""
-        SELECT * FROM {self.episode_table_name} ORDER BY id_tmdb,season,episode;
+        SELECT * FROM {self.episode_table_name} ORDER BY id,season,episode;
         """)
         lines = self.__cursor.fetchall()
         if debug:
@@ -191,7 +185,7 @@ class TVShowDb:
     def select_all_episodes_by_tvshow(self, tvshow, debug=False):
         self.__connect()
         self.__cursor.execute(f"""
-        SELECT * FROM {self.episode_table_name} WHERE id_tmdb = {tvshow.id_tmdb} ORDER BY season,episode;
+        SELECT * FROM {self.episode_table_name} WHERE id = {tvshow.id} ORDER BY season,episode;
         """)
         lines = self.__cursor.fetchall()
         if debug:
@@ -199,6 +193,10 @@ class TVShowDb:
                 print(line)
         self.__close_conn()
         return lines
+
+    def delete_all(self):
+        self.delete_all_tvshows()
+        self.delete_all_episodes()
 
     def delete_all_tvshows(self):
         self.__connect()
@@ -216,45 +214,45 @@ class TVShowDb:
         self.__commit()
         self.__close_conn()
 
-    def delete_all_episodes_from_tvshow(self, id_tmdb):
+    def delete_all_episodes_from_tvshow(self, id):
         self.__connect()
         self.__cursor.execute(f"""
-        DELETE FROM {self.episode_table_name} WHERE id_tmdb = {id_tmdb};
+        DELETE FROM {self.episode_table_name} WHERE id = {id};
         """)
         self.__commit()
         self.__close_conn()
 
-    def delete_tvshow_and_episodes(self, id_tmdb):
+    def delete_tvshow_and_episodes(self, id):
         self.__connect()
         self.__cursor.execute(f"""
-        DELETE FROM {self.episode_table_name} WHERE id_tmdb = {id_tmdb};
+        DELETE FROM {self.episode_table_name} WHERE id = {id};
         """)
         self.__cursor.execute(f"""
-        DELETE FROM {self.main_table_name} WHERE id_tmdb = {id_tmdb};
+        DELETE FROM {self.main_table_name} WHERE id = {id};
         """)
         self.__commit()
         self.__close_conn()
 
-    def mark_reset_episode_seen(self, id_tmdb, season, episode, value):
+    def mark_reset_episode_seen(self, id, season, episode, value):
         self.__connect()
         self.__cursor.execute(f"""
         UPDATE {self.episode_table_name}
         SET
         watched = {value}
         WHERE
-        id_tmdb = {id_tmdb} AND season = {season} AND episode = {episode};
+        id = {id} AND season = {season} AND episode = {episode};
         """)
         self.__commit()
         self.__close_conn()
 
-    def mark_reset_season_seen(self, id_tmdb, season, value):
+    def mark_reset_season_seen(self, id, season, value):
         self.__connect()
         self.__cursor.execute(f"""
         UPDATE {self.episode_table_name}
         SET
         watched = {value}
         WHERE
-        id_tmdb = {id_tmdb} AND season = {season};
+        id = {id} AND season = {season};
         """)
         self.__commit()
         self.__close_conn()

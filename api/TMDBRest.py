@@ -60,24 +60,24 @@ class TMDBRest:
         self.__response = requests.get(self.__url, timeout=self.__timeout)
         return self.__handle_response()
 
-    def get_tvshow_info(self, id_tmdb):
+    def get_tvshow_info(self, id):
         # print('get_tvshow_info()...')
         self.__clean()
         self.__create_headers()
         self.url_add_path('tv')
-        self.url_add_path(id_tmdb)
+        self.url_add_path(id)
         self.url_add_param()
         # self.dump_url()
 
         self.__response = requests.get(self.__url, timeout=self.__timeout)
         return self.__handle_response()
 
-    def get_tvshow_season_episodes(self, id_tmdb, season):
+    def get_tvshow_season_episodes(self, id, season):
         # print('get_tvshow_season_episodes()...')
         self.__clean()
         self.__create_headers()
         self.url_add_path('tv')
-        self.url_add_path(id_tmdb)
+        self.url_add_path(id)
         self.url_add_path('season')
         self.url_add_path(season)
         self.url_add_param()
