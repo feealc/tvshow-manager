@@ -81,8 +81,8 @@ class DashboardWindow(QMainWindow):
         row1.addWidget(self.tab1_bt_open_tmdb)
 
         # labels
-        self.tab1_lbl_id_tmdb = QLabel()
-        self.tab1_lbl_id_tmdb.setFont(QFont('Arial', 12))
+        self.tab1_lbl_id = QLabel()
+        self.tab1_lbl_id.setFont(QFont('Arial', 12))
         self.tab1_lbl_status = QLabel()
         self.tab1_lbl_status.setFont(QFont('Arial', 12))
         self.tab1_lbl_network = QLabel()
@@ -124,7 +124,7 @@ class DashboardWindow(QMainWindow):
 
         self.tab1_layout.addLayout(row1)
         self.tab1_layout.addSpacing(self.__spacing)
-        self.tab1_layout.addWidget(self.tab1_lbl_id_tmdb)
+        self.tab1_layout.addWidget(self.tab1_lbl_id)
         self.tab1_layout.addSpacing(self.__spacing)
         self.tab1_layout.addWidget(self.tab1_lbl_status)
         self.tab1_layout.addSpacing(self.__spacing)
@@ -139,7 +139,7 @@ class DashboardWindow(QMainWindow):
         self.tab1.setLayout(self.tab1_layout)
 
     def __tab1_labels_set_text(self):
-        self.tab1_lbl_id_tmdb.setText(f'ID TMDB: {self.tvshow.id_tmdb}')
+        self.tab1_lbl_id.setText(f'ID: {self.tvshow.id}')
         self.tab1_lbl_status.setText(f'Status: {self.tvshow.status}')
         self.tab1_lbl_network.setText(f'Emissora: {self.tvshow.network}')
         self.tab1_lbl_first_air_date.setText(f'Exibição 1º episódio: {self.tvshow.get_first_air_date()}')
@@ -258,8 +258,10 @@ class DashboardWindow(QMainWindow):
         for tvs in self.tab2_episodes_list_filter:
             self.tab2_main_table.b_add_row(from_tuple=tvs.to_tuple_table())
 
+        episodes_count = len(self.tab2_episodes_list_filter)
         self.tab2_pbar.setMinimum(0)
-        self.tab2_pbar.setMaximum(len(self.tab2_episodes_list_filter))
+        if episodes_count != 0:
+            self.tab2_pbar.setMaximum(episodes_count)
         eps_watched = 0
         for ep in self.tab2_episodes_list_filter:
             if ep.watched:
@@ -273,7 +275,7 @@ class DashboardWindow(QMainWindow):
     def __tab1_action_update(self):
         # print('__action_update()')
         try:
-            ret = self.__api.get_tvshow_info(id_tmdb=self.tvshow.id_tmdb)
+            ret = self.__api.get_tvshow_info(id=self.tvshow.id)
             # print(json.dumps(ret, indent=4, ensure_ascii=False))
             if ret['status_code'] == 200:
                 self.tvshow.parse_from_json_api(json=ret['resp_json'])
@@ -301,11 +303,11 @@ class DashboardWindow(QMainWindow):
         if q == QMessageBox.Yes:
             # print('yes')
             # print(self.tvshow)
-            self.__db.delete_all_episodes_from_tvshow(self.tvshow.id_tmdb)
+            self.__db.delete_all_episodes_from_tvshow(id=self.tvshow.id)
             # self.tvshow.total_seasons = 2  # forçando pra testar
             for temp in range(1, self.tvshow.number_of_seasons + 1):
                 # print(f'temp [{temp}]')
-                ret = self.__api.get_tvshow_season_episodes(id_tmdb=self.tvshow.id_tmdb, season=temp)
+                ret = self.__api.get_tvshow_season_episodes(id=self.tvshow.id, season=temp)
                 episodes_json = ret['resp_json']['episodes']
                 # print(json.dumps(episodes_json, indent=4, ensure_ascii=False))
 
@@ -313,7 +315,7 @@ class DashboardWindow(QMainWindow):
                 episodes_list_tuple = []
                 for ep_json in episodes_json:
                     ep = TVShowEpisodes(from_json=ep_json)
-                    ep.set_id_tmdb(self.tvshow.id_tmdb)
+                    ep.set_id(id=self.tvshow.id)
                     # print(ep)
                     if ep.air_date != '':
                         # adicionar apenas episodio com data menor/igual a corrente
@@ -341,7 +343,7 @@ class DashboardWindow(QMainWindow):
             else:
                 ep = self.tab2_episodes_list[index]
             # print(ep)
-            self.__db.mark_reset_episode_seen(id_tmdb=ep.id_tmdb, season=ep.season, episode=ep.episode, value=value)
+            self.__db.mark_reset_episode_seen(id=ep.id, season=ep.season, episode=ep.episode, value=value)
             self.__tab2_load_episodes()
         else:
             QMessageBox.information(self, ' ', 'Escolha um episódio.', QMessageBox.Ok)
@@ -358,7 +360,7 @@ class DashboardWindow(QMainWindow):
         # print(f'index [{index}]')
         if index >= 0:
             val = self.tab2_cb_seasons_filter.currentText()
-            self.__db.mark_reset_season_seen(id_tmdb=self.tvshow.id_tmdb, season=val, value=value)
+            self.__db.mark_reset_season_seen(id=self.tvshow.id, season=val, value=value)
             self.__tab2_load_episodes()
         else:
             QMessageBox.information(self, ' ', 'Selecione o filtro por uma temporada.', QMessageBox.Ok)

@@ -30,7 +30,7 @@ if __name__ == '__main__':
     db.insert_episodes_mock_example()
     db.select_all_episodes(debug=True)
 
-    # db.delete_all()
-    # db.reset_main_table()
-    # db.insert_tvshow_mock()
-    # db.select_all()
+    db.delete_all()
+    db.insert_tvshow_mock()
+    db.insert_episodes_mock_example()
+    db.select_all(debug=True)

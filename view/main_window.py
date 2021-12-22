@@ -55,7 +55,7 @@ class MainWindown(QMainWindow):
         self.main_table = BTableWidget()
         self.main_table.b_hide_vertical_headers()
         self.main_table.b_set_select_row()
-        header_labels = ['Id', 'Id TMDb', 'Nome', 'Temporadas', 'Eu', 'Pai']
+        header_labels = ['Id', 'Nome', 'Temporadas', 'Eu', 'Pai']
         self.main_table.b_set_column_header(header_labels=header_labels)
         self.main_table.doubleClicked.connect(self.__show_dashboard_doubleclick)
 
@@ -95,11 +95,10 @@ class MainWindown(QMainWindow):
         # print(f'index [{index}]')
         if index >= 0:
             tvs = self.tvshows_list[index]
-            # print(f'name [{tvs.name}] id tmdb [{tvs.id_tmdb}]')
             q = QMessageBox.question(self, 'Apagar série', f'Tem certeza que deseja apagar a série {tvs.name}?',
                                      QMessageBox.Yes | QMessageBox.No)
             if q == QMessageBox.Yes:
-                self.__db.delete_tvshow_and_episodes(id_tmdb=tvs.id_tmdb)
+                self.__db.delete_tvshow_and_episodes(id=tvs.id)
                 QMessageBox.information(self, 'Apagar série', f'Série {tvs.name} apagada com sucesso.', QMessageBox.Ok)
                 self.__load_tbshows()
         else:
@@ -158,9 +157,6 @@ class MainWindown(QMainWindow):
         # id
         index = 0
         header.setSectionResizeMode(index, QHeaderView.ResizeToContents)
-        # id tmdb
-        index += 1
-        header.setSectionResizeMode(index, QHeaderView.ResizeToContents)
         # name
         index += 1
         header.setSectionResizeMode(index, QHeaderView.Stretch)
@@ -179,8 +175,6 @@ class MainWindown(QMainWindow):
         gb_test_layout = QVBoxLayout()
 
         row_tvshow = QHBoxLayout()
-        row_episodes = QHBoxLayout()
-
         bt_reload = QPushButton('Reload')
         bt_reload.clicked.connect(self.__create_test_buttons_reload)
         bt_reset = QPushButton('Reset')
@@ -188,6 +182,7 @@ class MainWindown(QMainWindow):
         row_tvshow.addWidget(bt_reload)
         row_tvshow.addWidget(bt_reset)
 
+        row_episodes = QHBoxLayout()
         bt_clear_episodes = QPushButton('Apagar todos episódios')
         bt_clear_episodes.clicked.connect(self.__create_test_buttons_clear_episodes)
         bt_reset_episodes = QPushButton('Reset episódios')
@@ -195,8 +190,17 @@ class MainWindown(QMainWindow):
         row_episodes.addWidget(bt_clear_episodes)
         row_episodes.addWidget(bt_reset_episodes)
 
+        row_select = QHBoxLayout()
+        bt_select_tvshow = QPushButton('Select séries')
+        bt_select_tvshow.clicked.connect(self.__create_test_buttons_select_tvshows)
+        bt_select_episodes = QPushButton('Select episódios')
+        bt_select_episodes.clicked.connect(self.__create_test_buttons_select_episodes)
+        row_select.addWidget(bt_select_tvshow)
+        row_select.addWidget(bt_select_episodes)
+
         gb_test_layout.addLayout(row_tvshow)
         gb_test_layout.addLayout(row_episodes)
+        gb_test_layout.addLayout(row_select)
 
         gb_test.setLayout(gb_test_layout)
         self.main_layout.addWidget(gb_test)
@@ -205,7 +209,6 @@ class MainWindown(QMainWindow):
         self.__load_tbshows()
 
     def __create_test_buttons_reset(self):
-        self.__db.reset_main_table()
         self.__db.insert_tvshow_mock()
         self.__load_tbshows()
         QMessageBox.information(self, ' ', 'Reset das séries realizado com sucesso.', QMessageBox.Ok)
@@ -218,6 +221,12 @@ class MainWindown(QMainWindow):
         self.__db.delete_all_episodes()
         self.__db.insert_episodes_mock_example()
         QMessageBox.information(self, ' ', 'Reset dos episódios realizado com sucesso.', QMessageBox.Ok)
+
+    def __create_test_buttons_select_tvshows(self):
+        self.__db.select_all_tvshows(debug=True)
+
+    def __create_test_buttons_select_episodes(self):
+        self.__db.select_all_episodes(debug=True)
 
     def __action_rb_all(self):
         self.__load_tbshows()
