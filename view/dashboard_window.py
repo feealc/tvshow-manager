@@ -142,14 +142,14 @@ class DashboardWindow(QMainWindow):
         self.tab1_lbl_id_tmdb.setText(f'ID TMDB: {self.tvshow.id_tmdb}')
         self.tab1_lbl_status.setText(f'Status: {self.tvshow.status}')
         self.tab1_lbl_network.setText(f'Emissora: {self.tvshow.network}')
-        self.tab1_lbl_first_air_date.setText(f'Exibição 1º episódio: {self.tvshow.first_air_date}')
+        self.tab1_lbl_first_air_date.setText(f'Exibição 1º episódio: {self.tvshow.get_first_air_date()}')
         self.tab1_lbl_number_of_seasons.setText(f'Temporadas: {self.tvshow.number_of_seasons}')
         self.tab1_lbl_number_of_episodes.setText(f'Episódios: {self.tvshow.number_of_episodes}')
 
-        self.tab1_lbl_last_episode_air_date.setText(f'Data exibição: {self.tvshow.last_episode_air_date}')
+        self.tab1_lbl_last_episode_air_date.setText(f'Data exibição: {self.tvshow.get_last_episode_air_date()}')
         self.tab1_lbl_last_episode_season_episode.setText(f'Episódio: {self.tvshow.get_last_episode()}')
 
-        self.tab1_lbl_next_episode_air_date.setText(f'Data exibição: {self.tvshow.next_episode_air_date}')
+        self.tab1_lbl_next_episode_air_date.setText(f'Data exibição: {self.tvshow.get_next_episode_air_date()}')
         self.tab1_lbl_next_episode_season_episode.setText(f'Episódio: {self.tvshow.get_next_episode()}')
 
     def __create_tabbar_tab2(self):

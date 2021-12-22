@@ -1,6 +1,9 @@
+from .tvshow_base import TVShowBase
 
-class TVShowSearch:
+
+class TVShowSearch(TVShowBase):
     def __init__(self, json):
+        super().__init__()
         self.__json = json
         self.__parse()
 
@@ -17,5 +20,8 @@ class TVShowSearch:
             self.first_air_date = self.__json['first_air_date']
 
     def to_tuple(self):
-        array = [self.name, self.first_air_date]
+        array = [self.name, self.get_first_air_date()]
         return tuple(array)
+
+    def get_first_air_date(self):
+        return self._format_date(value=self.first_air_date)
