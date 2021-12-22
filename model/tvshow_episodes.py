@@ -1,6 +1,9 @@
+from .tvshow_base import TVShowBase
 
-class TVShowEpisodes:
+
+class TVShowEpisodes(TVShowBase):
     def __init__(self, from_db=None, from_json=None):
+        super().__init__()
         if from_db is not None:
             self.__parse_from_tuple(from_db)
         if from_json is not None:
@@ -43,12 +46,15 @@ class TVShowEpisodes:
         self.id_tmdb = id_tmdb
 
     def to_tuple_table(self):
-        array = [self.season, self.episode, self.air_date, self.watched_table]
+        array = [self.season, self.episode, self.get_air_date(), self.watched_table]
         return tuple(array)
 
     def to_tuple(self):
         array = [self.id_tmdb, self.season, self.episode, self.air_date, self.watched]
         return tuple(array)
+
+    def get_air_date(self):
+        return self._format_date(value=self.air_date)
 
     def __treat_air_date(self):
         if self.air_date is None:

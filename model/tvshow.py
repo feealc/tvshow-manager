@@ -1,6 +1,9 @@
+from .tvshow_base import TVShowBase
 
-class TVShow:
+
+class TVShow(TVShowBase):
     def __init__(self, tuple_from_db):
+        super().__init__()
         # init var
         self.id = ''
         self.id_tmdb = ''
@@ -113,6 +116,15 @@ class TVShow:
             return f'{self.next_episode_season_number}x{self.next_episode_episode_number}'
         else:
             return ''
+
+    def get_last_episode_air_date(self):
+        return self._format_date(value=self.last_episode_air_date)
+
+    def get_next_episode_air_date(self):
+        return self._format_date(value=self.next_episode_air_date)
+
+    def get_first_air_date(self):
+        return self._format_date(value=self.first_air_date)
 
     def dump(self):
         msg = (
