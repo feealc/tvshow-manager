@@ -8,10 +8,10 @@ class TVShowSearch(TVShowBase):
         self.__parse()
 
     def __str__(self) -> str:
-        return f'Id TMDB [{self.id_tmdb}] Nome [{self.name}] First Air Date [{self.first_air_date}]'
+        return f'Id TMDB [{self.id}] Nome [{self.name}] First Air Date [{self.first_air_date}]'
 
     def __parse(self):
-        self.id_tmdb = self.__json['id']
+        self.id = self.__json['id']
 
         self.name = self.__json['name']
 
@@ -24,4 +24,4 @@ class TVShowSearch(TVShowBase):
         return tuple(array)
 
     def get_first_air_date(self):
-        return self._format_date(value=self.first_air_date)
+        return self.format_date(value=self.first_air_date)

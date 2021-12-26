@@ -4,8 +4,11 @@ import sqlite3
 
 
 class TVShowDb:
-    def __init__(self):
-        self.db_name = 'tvshow_database.db'
+    def __init__(self, db_name=None):
+        if db_name is None:
+            self.db_name = 'tvshow_database.db'
+        else:
+            self.db_name = db_name
         self.__conn = None
         self.__cursor = None
         self.main_table_name = 'tvshows'
@@ -22,6 +25,10 @@ class TVShowDb:
         print(f'conn [{self.__conn}]')
         print(f'cursor [{self.__cursor}]')
 
+    def create_db_file(self):
+        self.__connect()
+        self.__close_conn()
+
     def __connect(self):
         self.__conn = sqlite3.connect(self.db_name)
         self.__cursor = self.__conn.cursor()
@@ -34,23 +41,34 @@ class TVShowDb:
         if self.__conn:
             self.__conn.close()
 
-    def list_all_tables(self):
+    def get_row_count(self):
+        if self.__cursor:
+            return self.__cursor.rowcount
+        else:
+            return 0
+
+    def list_all_tables(self, debug=False):
         # listando as tabelas do bd
         self.__connect()
         self.__cursor.execute("""
         SELECT name FROM sqlite_master WHERE type='table' ORDER BY name
         """)
-        print('Tabelas:')
-        for tabela in self.__cursor.fetchall():
-            print('> [%s]' % tabela)
+        all_tables = self.__cursor.fetchall()
+        if debug:
+            print('Tabelas:')
+            for tabela in all_tables:
+                print('> [%s]' % tabela)
         self.__close_conn()
+        return all_tables
 
-    def list_columns_from_table(self, table_name):
+    def list_columns_from_table(self, table_name, debug=False):
         self.__connect()
         self.__cursor.execute('PRAGMA table_info({})'.format(table_name))
         cols = [tupla[1] for tupla in self.__cursor.fetchall()]
-        print(f'Colunas tabela {table_name}: {cols}')
+        if debug:
+            print(f'Colunas tabela {table_name}: {cols}')
         self.__close_conn()
+        return cols
 
     def create_main_table(self):
         self.__connect()
@@ -81,6 +99,11 @@ class TVShowDb:
         self.__commit()
         self.__close_conn()
 
+    """
+    ===============================================================================================
+    INSERT
+    ===============================================================================================
+    """
     def insert_tvshow(self, *args):
         # 1 - id_tmdb
         # 2 - name
@@ -132,14 +155,7 @@ class TVShowDb:
             #     print(f'watched random [{watched}]')
             tup = (id, season, ep, air_date, watched)
             rows.append(tup)
-
-        self.__connect()
-        self.__cursor.executemany(f"""
-        INSERT INTO {self.episode_table_name} (id, season, episode, air_date, watched)
-        VALUES (?,?,?,?,?)
-        """, rows)
-        self.__commit()
-        self.__close_conn()
+        self.insert_episode(rows=rows)
 
     def insert_episodes_mock_example(self):
         # fbi
@@ -154,6 +170,11 @@ class TVShowDb:
         self.insert_episode_mock(id=79744, season=3, episode_max=14)
         self.insert_episode_mock(id=79744, season=4, episode_max=7)
 
+    """
+    ===============================================================================================
+    SELECT
+    ===============================================================================================
+    """
     def select_all(self, debug=False):
         self.select_all_tvshows(debug=debug)
         self.select_all_episodes(debug=debug)
@@ -182,10 +203,10 @@ class TVShowDb:
         self.__close_conn()
         return lines
 
-    def select_all_episodes_by_tvshow(self, tvshow, debug=False):
+    def select_all_episodes_by_tvshow(self, id, debug=False):
         self.__connect()
         self.__cursor.execute(f"""
-        SELECT * FROM {self.episode_table_name} WHERE id = {tvshow.id} ORDER BY season,episode;
+        SELECT * FROM {self.episode_table_name} WHERE id = {id} ORDER BY season,episode;
         """)
         lines = self.__cursor.fetchall()
         if debug:
@@ -194,6 +215,38 @@ class TVShowDb:
         self.__close_conn()
         return lines
 
+    def select_episode(self, id, season, episode, debug=False):
+        self.__connect()
+        self.__cursor.execute(f"""
+        SELECT * FROM {self.episode_table_name}
+        WHERE
+        id = {id} AND season = {season} AND episode = {episode};
+        """)
+        line = self.__cursor.fetchone()
+        if debug:
+            print(line)
+        self.__close_conn()
+        return line
+
+    def select_episodes_from_season(self, id, season, debug=False):
+        self.__connect()
+        self.__cursor.execute(f"""
+        SELECT * FROM {self.episode_table_name}
+        WHERE
+        id = {id} AND season = {season};
+        """)
+        lines = self.__cursor.fetchall()
+        if debug:
+            for line in lines:
+                print(line)
+        self.__close_conn()
+        return lines
+
+    """
+    ===============================================================================================
+    DELETE
+    ===============================================================================================
+    """
     def delete_all(self):
         self.delete_all_tvshows()
         self.delete_all_episodes()
@@ -233,6 +286,11 @@ class TVShowDb:
         self.__commit()
         self.__close_conn()
 
+    """
+    ===============================================================================================
+    MARK SEEN
+    ===============================================================================================
+    """
     def mark_reset_episode_seen(self, id, season, episode, value):
         self.__connect()
         self.__cursor.execute(f"""
@@ -242,8 +300,10 @@ class TVShowDb:
         WHERE
         id = {id} AND season = {season} AND episode = {episode};
         """)
+        rows = self.get_row_count()
         self.__commit()
         self.__close_conn()
+        return rows
 
     def mark_reset_season_seen(self, id, season, value):
         self.__connect()
@@ -254,5 +314,7 @@ class TVShowDb:
         WHERE
         id = {id} AND season = {season};
         """)
+        rows = self.get_row_count()
         self.__commit()
         self.__close_conn()
+        return rows

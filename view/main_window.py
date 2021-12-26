@@ -139,10 +139,10 @@ class MainWindown(QMainWindow):
         self.tvshows_list_filter = []
         for tvs in self.tvshows_list:
             if self.rb_eu.isChecked():
-                if tvs.eu == 'Sim':
+                if tvs.eu:
                     self.tvshows_list_filter.append(tvs)
             elif self.rb_pai.isChecked():
-                if tvs.pai == 'Sim':
+                if tvs.pai:
                     self.tvshows_list_filter.append(tvs)
             else:
                 self.tvshows_list_filter.append(tvs)
