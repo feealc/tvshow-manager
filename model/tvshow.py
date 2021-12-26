@@ -39,14 +39,16 @@ class TVShow(TVShowBase):
         self.number_of_seasons = tuple_from_db[index]
 
         index += 1
-        self.eu = ''
-        if tuple_from_db[index]:
-            self.eu = 'Sim'
+        self.eu = bool(tuple_from_db[index])
+        self.eu_desc = ''
+        if self.eu:
+            self.eu_desc = 'Sim'
 
         index += 1
-        self.pai = ''
-        if tuple_from_db[index]:
-            self.pai = 'Sim'
+        self.pai = bool(tuple_from_db[index])
+        self.pai_desc = ''
+        if self.pai:
+            self.pai_desc = 'Sim'
 
     def parse_from_json_api(self, json):
         key = 'first_air_date'
@@ -114,13 +116,13 @@ class TVShow(TVShowBase):
             return ''
 
     def get_last_episode_air_date(self):
-        return self._format_date(value=self.last_episode_air_date)
+        return self.format_date(value=self.last_episode_air_date)
 
     def get_next_episode_air_date(self):
-        return self._format_date(value=self.next_episode_air_date)
+        return self.format_date(value=self.next_episode_air_date)
 
     def get_first_air_date(self):
-        return self._format_date(value=self.first_air_date)
+        return self.format_date(value=self.first_air_date)
 
     def dump(self):
         msg = (
@@ -139,7 +141,7 @@ class TVShow(TVShowBase):
         print(msg)
 
     def to_tuple(self):
-        array = [self.id, self.name, self.number_of_seasons, self.eu, self.pai]
+        array = [self.id, self.name, self.number_of_seasons, self.eu_desc, self.pai_desc]
         return tuple(array)
 
     def get_url_tmdb(self):

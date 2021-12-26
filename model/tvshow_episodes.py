@@ -54,7 +54,7 @@ class TVShowEpisodes(TVShowBase):
         return tuple(array)
 
     def get_air_date(self):
-        return self._format_date(value=self.air_date)
+        return self.format_date(value=self.air_date)
 
     def __treat_air_date(self):
         if self.air_date is None:

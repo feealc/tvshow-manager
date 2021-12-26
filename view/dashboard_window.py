@@ -236,7 +236,7 @@ class DashboardWindow(QMainWindow):
         val = self.tab2_cb_seasons_filter.currentText()
         self.tab2_is_filtered = True if index >= 0 else False
 
-        lines = self.__db.select_all_episodes_by_tvshow(tvshow=self.tvshow, debug=False)
+        lines = self.__db.select_all_episodes_by_tvshow(id=self.tvshow.id, debug=False)
         self.tab2_episodes_list = []
         seasons_list = []
         for line in lines:

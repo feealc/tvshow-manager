@@ -147,16 +147,18 @@ class AddTvShowWindow(QMainWindow):
             q = QMessageBox.question(self, ' ', msg, QMessageBox.Yes | QMessageBox.No)
             if q == QMessageBox.Yes:
                 try:
-                    ret = self.__api.get_tvshow_info(tvs.id_tmdb)
+                    ret = self.__api.get_tvshow_info(tvs.id)
                     # print(json.dumps(ret, indent=4, ensure_ascii=False))
                     total_seasons = ret['resp_json']['number_of_seasons']
                     # print(f'number_of_seasons [{total_seasons}]')
 
-                    self.__db.insert_tvshow(tvs.id_tmdb, tvs.name, total_seasons, op_eu, op_pai)
+                    self.__db.insert_tvshow(tvs.id, tvs.name, total_seasons, op_eu, op_pai)
                     QMessageBox.information(self, ' ', f'Série {show_to_add} adicionada com sucesso.', QMessageBox.Ok)
                     self.close()
                 except:
-                    pass
+                    print(traceback.format_exc())
+                    QMessageBox.critical(self, ' ', f'Erro ao salvar série {show_to_add}.', QMessageBox.Ok)
+                    return
         else:
             row_count = self.table_result.rowCount()
             if row_count == 0:
