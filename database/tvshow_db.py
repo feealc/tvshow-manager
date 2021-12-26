@@ -242,6 +242,19 @@ class TVShowDb:
         self.__close_conn()
         return lines
 
+    def select_tvshow_exist(self, id, debug=False):
+        self.__connect()
+        self.__cursor.execute(f"""
+        SELECT COUNT(*) FROM {self.main_table_name}
+        WHERE
+        id = {id};
+        """)
+        result = self.__cursor.fetchone()
+        if debug:
+            print(result)
+        self.__close_conn()
+        return result
+
     """
     ===============================================================================================
     DELETE
