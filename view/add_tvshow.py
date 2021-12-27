@@ -40,7 +40,7 @@ class AddTvShowWindow(QMainWindow):
         self.textbox_name = QLineEdit()
         # self.textbox_name.setText('NCIS')
         self.button_search = QPushButton('Buscar')
-        self.button_search.clicked.connect(self.search_tvshow)
+        self.button_search.clicked.connect(self.__action_search_tvshow)
 
         self.layout_row = QHBoxLayout()
         self.layout_row.addWidget(self.label_name)
@@ -65,21 +65,26 @@ class AddTvShowWindow(QMainWindow):
         self.groupbox_rb = QGroupBox()
         self.groupbox_rb.setLayout(self.layout_rb)
 
+        row_bts = QHBoxLayout()
         self.bt_save = QPushButton('Salvar')
-        self.bt_save.clicked.connect(self.save_add_tvshow)
+        self.bt_save.clicked.connect(self.__action_save)
+        self.bt_save_and_close = QPushButton('Salvar e Fechar')
+        self.bt_save_and_close.clicked.connect(self.__action_save_and_close)
+        row_bts.addWidget(self.bt_save)
+        row_bts.addWidget(self.bt_save_and_close)
 
         # 
 
         self.main_layout.addLayout(self.layout_row)
         self.main_layout.addWidget(self.table_result)
         self.main_layout.addWidget(self.groupbox_rb)
-        self.main_layout.addWidget(self.bt_save)
+        self.main_layout.addLayout(row_bts)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             self.close()
 
-    def search_tvshow(self):
+    def __action_search_tvshow(self):
         tvshow_name_search = self.textbox_name.text()
 
         if len(tvshow_name_search) == 0:
@@ -128,7 +133,13 @@ class AddTvShowWindow(QMainWindow):
         index += 1
         header.setSectionResizeMode(index, QHeaderView.ResizeToContents)
 
-    def save_add_tvshow(self):
+    def __action_save(self):
+        self.__save_tvshow(close_window=False)
+
+    def __action_save_and_close(self):
+        self.__save_tvshow(close_window=True)
+
+    def __save_tvshow(self, close_window=False):
         index = self.table_result.currentRow()
         # print(f'table row [{index}]')
         if index >= 0:
@@ -159,7 +170,8 @@ class AddTvShowWindow(QMainWindow):
 
                     self.__db.insert_tvshow(tvs.id, tvs.name, total_seasons, op_eu, op_pai)
                     QMessageBox.information(self, ' ', f'Série {show_to_add} adicionada com sucesso.', QMessageBox.Ok)
-                    self.close()
+                    if close_window:
+                        self.close()
                 except:
                     print(traceback.format_exc())
                     QMessageBox.critical(self, ' ', f'Erro ao salvar série {show_to_add}.', QMessageBox.Ok)
