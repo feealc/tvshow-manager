@@ -318,9 +318,9 @@ class DashboardWindow(QMainWindow):
                     ep.set_id(id=self.tvshow.id)
                     # print(ep)
                     if ep.air_date != '':
-                        # adicionar apenas episodio com data menor/igual a corrente
-                        self.episodes_list.append(ep)
-                        episodes_list_tuple.append(ep.to_tuple())
+                        if ep.is_episode_air_date_valid(value=ep.air_date):
+                            self.episodes_list.append(ep)
+                            episodes_list_tuple.append(ep.to_tuple())
 
                 self.__db.insert_episode(episodes_list_tuple)
 

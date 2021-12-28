@@ -10,7 +10,20 @@ class TVShowBase:
 
     def format_date(self, value):
         if value != '':
-            date_obj = datetime.strptime(value, self.__format_str_in)
+            date_obj = self.__convert_to_date_obj(value=value)
             return date_obj.strftime(self.__format_str_out)
         else:
             return ''
+
+    def is_episode_air_date_valid(self, value):
+        if value != '':
+            date_obj = self.__convert_to_date_obj(value=value)
+            if date_obj <= datetime.now():
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def __convert_to_date_obj(self, value):
+        return datetime.strptime(value, self.__format_str_in)
