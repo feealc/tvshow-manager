@@ -55,7 +55,7 @@ class MainWindown(QMainWindow):
         self.main_table = BTableWidget()
         self.main_table.b_hide_vertical_headers()
         self.main_table.b_set_select_row()
-        header_labels = ['Id', 'Nome', 'Temporadas', 'Eu', 'Pai']
+        header_labels = ['Id', 'Nome', 'Temporadas', 'Episódios', 'Eu', 'Pai']
         self.main_table.b_set_column_header(header_labels=header_labels)
         self.main_table.doubleClicked.connect(self.__show_dashboard_doubleclick)
 
@@ -112,6 +112,7 @@ class MainWindown(QMainWindow):
             tvs = self.tvshows_list[index]
             # print(tvs)
             self.dashboard_win = DashboardWindow(tvshow=tvs)
+            self.dashboard_win.window_closed.connect(self.add_win_close_event)
             self.dashboard_win.show()
         # else:
         #     print('nada sera feito...')
@@ -122,6 +123,7 @@ class MainWindown(QMainWindow):
             tvs = self.tvshows_list[index]
             # print(tvs)
             self.dashboard_win = DashboardWindow(tvshow=tvs)
+            self.dashboard_win.window_closed.connect(self.add_win_close_event)
             self.dashboard_win.show()
 
     def add_win_close_event(self):
@@ -161,6 +163,9 @@ class MainWindown(QMainWindow):
         index += 1
         header.setSectionResizeMode(index, QHeaderView.Stretch)
         # seasons
+        index += 1
+        header.setSectionResizeMode(index, QHeaderView.ResizeToContents)
+        # episodes
         index += 1
         header.setSectionResizeMode(index, QHeaderView.ResizeToContents)
         # eu
@@ -215,11 +220,13 @@ class MainWindown(QMainWindow):
 
     def __create_test_buttons_clear_episodes(self):
         self.__db.delete_all_episodes()
+        self.__load_tbshows()
         QMessageBox.information(self, ' ', 'Todos os episódios foram apagados.', QMessageBox.Ok)
 
     def __create_test_buttons_reset_episodes(self):
         self.__db.delete_all_episodes()
         self.__db.insert_episodes_mock_example()
+        self.__load_tbshows()
         QMessageBox.information(self, ' ', 'Reset dos episódios realizado com sucesso.', QMessageBox.Ok)
 
     def __create_test_buttons_select_tvshows(self):
