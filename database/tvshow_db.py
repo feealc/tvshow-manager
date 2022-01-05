@@ -203,10 +203,12 @@ class TVShowDb:
         self.__close_conn()
         return lines
 
-    def select_all_episodes_by_tvshow(self, id, debug=False):
+    def select_all_episodes_by_tvshow(self, id, sort_desc=False, debug=False):
+        sort_key = 'DESC' if sort_desc else ''
         self.__connect()
         self.__cursor.execute(f"""
-        SELECT * FROM {self.episode_table_name} WHERE id = {id} ORDER BY season,episode;
+        SELECT * FROM {self.episode_table_name} WHERE id = {id}
+        ORDER BY season {sort_key}, episode {sort_key};
         """)
         lines = self.__cursor.fetchall()
         if debug:
