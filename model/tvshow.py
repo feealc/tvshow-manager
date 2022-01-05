@@ -1,4 +1,5 @@
 from .tvshow_base import TVShowBase
+from database.tvshow_db import TVShowDb
 
 
 class TVShow(TVShowBase):
@@ -21,12 +22,20 @@ class TVShow(TVShowBase):
         self.number_of_episodes = ''
         self.network = ''
         self.status = ''
+        self.total_episodes_table = 0
 
         self.__parse(tuple_from_db)
 
+        self.__db = TVShowDb()
+        self.set_total_episodes_table()
+
     def __str__(self) -> str:
-        return f'id [{self.id}] Temp [{self.number_of_seasons}] ' \
-               f'Nome [{self.name}] Eu [{self.eu}] Pai [{self.pai}]'
+        return f'id [{self.id}] ' \
+               f'Nome [{self.name}] ' \
+               f'Temp [{self.number_of_seasons}] ' \
+               f'Episodios [{self.total_episodes_table}] ' \
+               f'Eu [{self.eu}] ' \
+               f'Pai [{self.pai}]'
 
     def __parse(self, tuple_from_db):
         index = 0
@@ -103,6 +112,10 @@ class TVShow(TVShowBase):
         if key in json:
             self.status = json[key]
 
+    def set_total_episodes_table(self):
+        lines = self.__db.select_all_episodes_by_tvshow(id=self.id)
+        self.total_episodes_table = len(lines)
+
     def get_last_episode(self):
         if self.last_episode_season_number != '' and self.last_episode_episode_number != '':
             return f'{self.last_episode_season_number}x{self.last_episode_episode_number}'
@@ -141,7 +154,7 @@ class TVShow(TVShowBase):
         print(msg)
 
     def to_tuple(self):
-        array = [self.id, self.name, self.number_of_seasons, self.eu_desc, self.pai_desc]
+        array = [self.id, self.name, self.number_of_seasons, self.total_episodes_table, self.eu_desc, self.pai_desc]
         return tuple(array)
 
     def get_url_tmdb(self):
