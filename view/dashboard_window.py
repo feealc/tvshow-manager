@@ -158,8 +158,13 @@ class DashboardWindow(QMainWindow):
         self.tab2_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # init episodes button
+        row_init_upd_epsodes = QHBoxLayout()
         self.tab2_bt_init_from_tmdb = QPushButton('Inicializar episódios')
         self.tab2_bt_init_from_tmdb.clicked.connect(self.__tab2_action_init_from_tmdb)
+        self.tab2_bt_update_from_tmdb = QPushButton('Atualizar últimos episódios')
+        self.tab2_bt_update_from_tmdb.clicked.connect(self.__tab2_action_update_episodes)
+        row_init_upd_epsodes.addWidget(self.tab2_bt_init_from_tmdb)
+        row_init_upd_epsodes.addWidget(self.tab2_bt_update_from_tmdb)
 
         # filter options
         self.tab2_gb_filter = QGroupBox('Filtro')
@@ -219,7 +224,7 @@ class DashboardWindow(QMainWindow):
 
         # ---
 
-        self.tab2_layout.addWidget(self.tab2_bt_init_from_tmdb)
+        self.tab2_layout.addLayout(row_init_upd_epsodes)
         self.tab2_layout.addWidget(self.tab2_gb_filter)
         self.tab2_layout.addWidget(self.tab2_pbar)
         self.tab2_layout.addLayout(row_table)
@@ -326,6 +331,57 @@ class DashboardWindow(QMainWindow):
 
             self.__tab2_load_episodes()
             QMessageBox.information(self, ' ', 'Inicialização realizada com sucesso.', QMessageBox.Ok)
+
+    def __tab2_action_update_episodes(self):
+        line = self.__db.select_last_episode(id=self.tvshow.id, debug=True)
+        if line is None:
+            msg = 'Não há episódios da série. É necessário inicializar.'
+            QMessageBox.information(self, ' ', msg, QMessageBox.Ok)
+            return
+        tvs_db = TVShowEpisodes(from_db=line)
+        ret = self.__api.get_tvshow_info(id=self.tvshow.id)
+        if ret['status_code'] == 200:
+            self.tvshow.parse_from_json_api(json=ret['resp_json'])
+            self.tvshow.dump()
+            if tvs_db.season == self.tvshow.last_episode_season_number:  # same season
+                if tvs_db.episode == self.tvshow.last_episode_episode_number:
+                    QMessageBox.information(self, ' ', 'Não há episódios para atualizar.', QMessageBox.Ok)
+                    return
+                temp = tvs_db.season
+                diff_ep = self.tvshow.last_episode_episode_number - tvs_db.episode
+                if diff_ep > 0:
+                    print(f'diff_ep [{diff_ep}] last ep [{tvs_db.episode}]')
+                    ret = self.__api.get_tvshow_season_episodes(id=self.tvshow.id, season=temp)
+                    episodes_json = ret['resp_json']['episodes']
+                    episodes_update = []
+                    for ep_json in episodes_json:
+                        ep = TVShowEpisodes(from_json=ep_json)
+                        ep.set_id(id=self.tvshow.id)
+                        if ep.episode > tvs_db.episode:
+                            if ep.is_episode_air_date_valid(value=ep.air_date):
+                                # print(ep)
+                                episodes_update.append(ep.to_tuple())
+
+                    self.__db.insert_episode(rows=episodes_update)
+
+                    self.__tab2_load_episodes()
+                    QMessageBox.information(self, ' ', 'Episódios atualizados com sucesso.', QMessageBox.Ok)
+            elif self.tvshow.last_episode_season_number > tvs_db.season:  # next season
+                temp = self.tvshow.last_episode_season_number
+                ret = self.__api.get_tvshow_season_episodes(id=self.tvshow.id, season=temp)
+                episodes_json = ret['resp_json']['episodes']
+                episodes_update = []
+                for ep_json in episodes_json:
+                    ep = TVShowEpisodes(from_json=ep_json)
+                    ep.set_id(id=self.tvshow.id)
+                    if ep.is_episode_air_date_valid(value=ep.air_date):
+                        # print(ep)
+                        episodes_update.append(ep.to_tuple())
+
+                self.__db.insert_episode(rows=episodes_update)
+
+                self.__tab2_load_episodes()
+                QMessageBox.information(self, ' ', 'Episódios atualizados com sucesso.', QMessageBox.Ok)
 
     def __tab2_action_cb_filter_changed(self):
         self.__tab2_load_episodes()
