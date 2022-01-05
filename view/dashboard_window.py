@@ -233,7 +233,7 @@ class DashboardWindow(QMainWindow):
 
         self.__tab2_load_episodes()
 
-    def __tab2_load_episodes(self):
+    def __tab2_load_episodes(self, sort_desc=True):
         # print('__tab2_load_episodes()')
         self.tab2_main_table.b_clear_content()
 
@@ -241,7 +241,7 @@ class DashboardWindow(QMainWindow):
         val = self.tab2_cb_seasons_filter.currentText()
         self.tab2_is_filtered = True if index >= 0 else False
 
-        lines = self.__db.select_all_episodes_by_tvshow(id=self.tvshow.id, debug=False)
+        lines = self.__db.select_all_episodes_by_tvshow(id=self.tvshow.id, sort_desc=sort_desc, debug=False)
         self.tab2_episodes_list = []
         seasons_list = []
         for line in lines:
