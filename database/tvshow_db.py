@@ -255,6 +255,20 @@ class TVShowDb:
         self.__close_conn()
         return result
 
+    def select_last_episode(self, id, debug=False):
+        self.__connect()
+        self.__cursor.execute(f"""
+        SELECT * FROM {self.episode_table_name}
+        WHERE
+        id = {id}
+        ORDER BY season DESC, episode DESC;
+        """)
+        line = self.__cursor.fetchone()
+        if debug:
+            print(line)
+        self.__close_conn()
+        return line
+
     """
     ===============================================================================================
     DELETE
