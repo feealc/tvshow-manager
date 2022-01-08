@@ -3,7 +3,7 @@ from database.tvshow_db import TVShowDb
 
 
 class TVShow(TVShowBase):
-    def __init__(self, tuple_from_db):
+    def __init__(self, tuple_from_db, db_name=None):
         super().__init__()
         # init var
         self.id = ''
@@ -26,7 +26,7 @@ class TVShow(TVShowBase):
 
         self.__parse(tuple_from_db)
 
-        self.__db = TVShowDb()
+        self.__db = TVShowDb(db_name=db_name)
         self.set_total_episodes_table()
 
     def __str__(self) -> str:
