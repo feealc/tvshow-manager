@@ -5,7 +5,7 @@ import unittest
 import os
 
 # RUN - python -m unittest -v
-# RUN - python -m unittest -v tests.test_db
+# RUN - python -m unittest -v test.test_db
 
 
 class MyTestDb(unittest.TestCase):
@@ -79,7 +79,15 @@ class MyTestDb(unittest.TestCase):
         self.assertEqual(lines[0], self.tvs1)
         self.assertEqual(lines[1], self.tvs2)
 
-    def test_db_02_02_insert_episode(self):
+    def test_db_02_02_insert_tvshow_duplicate(self):
+        ret1 = self.db.select_tvshow_exist(id=self.tvs1_id)
+        self.assertEqual(ret1, 1)
+        ret2 = self.db.select_tvshow_exist(id=self.tvs2_id)
+        self.assertEqual(ret2, 1)
+        ret3 = self.db.select_tvshow_exist(id=55323324332532523)
+        self.assertEqual(ret3, 0)
+
+    def test_db_02_03_insert_episode(self):
         self.db.insert_episode_mock(id=self.tvs1_id, season=1, episode_max=3, air_date=None, watched=False)
         self.db.insert_episode_mock(id=self.tvs2_id, season=1, episode_max=2, air_date=None, watched=False)
         lines = self.db.select_all_episodes()
@@ -111,7 +119,14 @@ class MyTestDb(unittest.TestCase):
         lines = self.db.select_all_episodes()
         self.assertEqual(len(lines), 5)
 
-    def test_db_03_03_select_episode_by_tvshow(self):
+    def test_db_03_03_select_tvshow_tuple(self):
+        tvs_tuple = (self.tvs1_id, 'Teste 1', 1, 3, 'Sim', '')
+        lines = self.db.select_all_tvshows()
+        self.db.select_all_episodes_by_tvshow(id=self.tvs1_id, debug=False)
+        tvs = TVShow(tuple_from_db=lines[0], db_name=self.db_name)
+        self.assertEqual(tvs.to_tuple(), tvs_tuple)
+
+    def test_db_03_04_select_episode_by_tvshow(self):
         lines = self.db.select_all_episodes_by_tvshow(id=self.tvs1_id)
         self.assertEqual(len(lines), 3)
         ep_cls = TVShowEpisodes(from_db=lines[0])

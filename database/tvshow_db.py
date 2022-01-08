@@ -255,7 +255,7 @@ class TVShowDb:
         if debug:
             print(result)
         self.__close_conn()
-        return result
+        return result[0]
 
     def select_last_episode(self, id, debug=False):
         self.__connect()

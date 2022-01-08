@@ -149,7 +149,7 @@ class AddTvShowWindow(QMainWindow):
             op_pai = self.rb_pai.isChecked()
             # print(f'serie [{show_to_add}] eu [{op_eu}] pai [{op_pai}]')
 
-            exist = self.__db.select_tvshow_exist(id=tvs.id)[0]
+            exist = self.__db.select_tvshow_exist(id=tvs.id)
             if exist > 0:
                 QMessageBox.warning(self, ' ', f'A série {show_to_add} já está cadastrada.', QMessageBox.Ok)
                 return
